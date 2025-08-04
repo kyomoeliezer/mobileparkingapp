@@ -12,7 +12,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uparking/pages/confirmation_page.dart';
 
+import 'package:image_picker/image_picker.dart';
 import '../../config/app_config.dart';
 import '../../config/common_functions.dart';
 import '../../constant/app_colors.dart';
@@ -21,6 +23,7 @@ import '../../db/sql_db_helper.dart';
 import '../../widgets/appbar_widget.dart';
 import '../../widgets/loading_with_words.dart';
 import '../../widgets/nav_drawer.dart';
+import 'action_select_page.dart';
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
@@ -31,15 +34,19 @@ class UpperCaseTextFormatter extends TextInputFormatter {
   }
 }
 class ScanningPage extends StatefulWidget {
+  bool isExit;
 
-  ScanningPage({super.key});
+  ScanningPage({super.key,required this.isExit});
 
   @override
   State<ScanningPage> createState() => _ScanningPageState();
 }
 
 class _ScanningPageState extends State<ScanningPage> {
+  File? galleryFile;
+  final picker = ImagePicker();
   //GoogleMapController? mapController;
+  String ? _error;
   Set<Marker> markers = {};
 
   late GoogleMapController mapController;
@@ -83,11 +90,21 @@ class _ScanningPageState extends State<ScanningPage> {
 
 
   ///DOWNLOAD TICKETS
-  Future<void> _goParking(String vehicleNo,String action) async {
+  Future<void> _goParking(String vehicleNo,String action,File? galleryFile2) async {
 
     setState(() {
+      _error=null;
       isProcessing=true;
     });
+  var dataOP={'vehicleNo': vehicleNo.toString(),'action':action};
+    if(galleryFile2 !=null) {
+      print('FileNameNow');
+      var datanameext=_getFileExtension(galleryFile2.path);
+      Uint8List imageBytes = await galleryFile2.readAsBytes();
+      String base64 = base64Encode(imageBytes);
+      dataOP['image']=base64;
+      dataOP['ext']=datanameext;
+    }
     //var parDataUrl='?vehicleNo='+vehicleNo+'&action='+action;
     //var urlData=AppConfig.go_parking+parDataUrl;
     //var response = await CommonFunction.getHttpRequest(urlData);
@@ -98,7 +115,7 @@ class _ScanningPageState extends State<ScanningPage> {
           HttpHeaders.contentTypeHeader: "application/json",
           HttpHeaders.authorizationHeader: "Bearer $accessToken",
         },
-        body: jsonEncode({'vehicleNo': vehicleNo.toString(),'action':action})
+        body: jsonEncode(dataOP)
     );
 
 
@@ -109,30 +126,41 @@ class _ScanningPageState extends State<ScanningPage> {
 
 
 
+
       if (isProcessing == true) {
         setState(() {
           isProcessing = false;
         });
       }
+      var data = jsonDecode(response.body);
 
       //AppConfig.successToast("Grades are successfully downloaded");
       CommonFunction.customSnack(context,"${vehicleNo} are successfully parking gone",1);
+      CommonFunction.transionRoute(context, ConfirmationPage(data: data,isExit:widget.isExit));
 
 
 
     } else {
+      setState(() {
+        _error=jsonDecode(response.body)['detail'];
+        if (isProcessing == true) isProcessing = false;;
+        print(_error);
 
-      if (isProcessing == true) {
-        setState(() {
-          isProcessing = false;
-        });
-      }
-      CommonFunction.customSnack(context,"${vehicleNo} failed to be downloaded.Please try again",0);
+      });
+
+
+      CommonFunction.customSnack(context,"${_error}",0);
 
       //AppConfig.errorToast("Grades failed to be downloaded.Please try again");
     }
   }
-
+  String _getFileExtension(String fileName) {
+    try {
+      return ".${fileName.split('.').last}";
+    } catch (e) {
+      return '';
+    }
+  }
 
   ///DATA
   @override
@@ -155,7 +183,7 @@ class _ScanningPageState extends State<ScanningPage> {
       drawer: NavDrawer(),
       appBar:AppBar(
         leading: IconButton(onPressed: () {
-          //CommonFunction.transionRoute(context, AmcosMainPage(amcosId: amcosId.toString(),code:amcosCode.toString(),name:amcosName.toString()));
+          CommonFunction.transionRoute(context, ActionSelectPage());
 
         }, icon:  Icon(Icons.arrow_back_ios_new_rounded, color:AppColor.whiteColor,size: 30.0,)),
 
@@ -174,6 +202,59 @@ class _ScanningPageState extends State<ScanningPage> {
 
 
   }
+
+  void _showPicker({
+    required BuildContext context,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future getImage(
+      ImageSource img,
+      ) async {
+    // pick image from gallary
+    final pickedFile = await picker.pickImage(source: img);
+    // store it in a valid variable
+    XFile? xfilePick = pickedFile;
+    setState(
+          () {
+        if (xfilePick != null) {
+          // store that in global variable galleryFile in the form of File
+          galleryFile = File(pickedFile!.path);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
+              const SnackBar(content: Text('Nothing is selected')));
+        }
+      },
+    );
+  }
+
   ///CREATE ONE
   Widget createData()  {
     print('onbuild');
@@ -199,7 +280,7 @@ class _ScanningPageState extends State<ScanningPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Center(child: Icon(Icons.car_repair_sharp,size: 100,)),
+                Center(child: Icon(Icons.car_repair_sharp,size: 100,color: _error !=null?AppColor.bootDangerColor:AppColor.bootProceedColor,)),
               ],
             ),
             Divider(
@@ -211,7 +292,7 @@ class _ScanningPageState extends State<ScanningPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  SizedBox(height:10,),
+                  /*SizedBox(height:10,),
                   BigText(txt: 'Vehicle Number',fontSize: 18,),
                   Padding(padding: EdgeInsets.all(2),
                       child:TextFormField(
@@ -249,9 +330,30 @@ class _ScanningPageState extends State<ScanningPage> {
                             return null;
                           }
                       )
-                  ),
+                  ),*/
 
-                 Padding(
+
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   children: [
+                     IconButton(onPressed: () {
+                       _showPicker(context: context);
+                     }, icon: Icon(Icons.camera,size: 100,color: AppColor.warningColor,)),
+                   ],
+                 ),
+                  BigText(txt: 'Click to take a picture only numbers plates',txtColor: AppColor.warningColor,),
+
+                  SizedBox(height: 60,),
+
+                  SizedBox(
+                    height: 200.0,
+                    width: 300.0,
+                    child: galleryFile == null
+                        ? const Center(child: Text('Sorry nothing selected!!'))
+                        : Center(child: Image.file(galleryFile!)),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 30),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -259,7 +361,8 @@ class _ScanningPageState extends State<ScanningPage> {
                         minimumSize: Size.fromHeight(50), // fromHeight use double.infinity as width and 40 is the height
                       ),
 
-                      child: BigText(txt:'GO',fontSize: 17,txtColor: AppColor.whiteColor,),
+
+                      child: BigText(txt:widget.isExit?'Go Out':'Go In',fontSize: 17,txtColor: AppColor.whiteColor,),
 
                       onPressed: () async {
                         print('Imebonyezwa');
@@ -269,139 +372,16 @@ class _ScanningPageState extends State<ScanningPage> {
                           print('_vehicle');
 
                           print(_vehicle.text);
-                          await _goParking(_vehicle.text.toString(),'in');
+                          if (widget.isExit) _goParking('test','out',galleryFile);
+                          else await _goParking('test','in',galleryFile);
 
                         }
 
                       },
 
                     ),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-  Widget viewData()  {
-    print('onbuild');
-    print(farmers);
-
-    ///works on receiving and transporting
-    return  SingleChildScrollView(
-      physics: PageScrollPhysics(),
-
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [
-
-            Divider(
-              color: AppColor.deepmaincolor,
-            ),
-          Padding(padding:EdgeInsets.all(20),child: BigText(txt: '${''}-visit',txtColor: AppColor.deepmaincolor,fontSize: 20,)),
-            Divider(
-              color: AppColor.deepmaincolor,
-            ),
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-
-                BigText(txt: 'Farmers Visited',fontSize: 19,),
-                  BigTextOverFlow(txt: '${_myFarmerField.text} '),
-
-
-
-
-
-                  SizedBox(height:10,),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-                  SizedBox(height:20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BigText(txt: 'Visited Place',fontSize: 18,),
-                      BigTextOverFlow(txt: '${_vehicle}'),
-                    ],
                   ),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-                  SizedBox(height:20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BigText(txt: 'Visited Reason',fontSize: 18,),
-                      BigTextOverFlow(txt: '${_vehicle}'),
-                    ],
-                  ),
-                  SizedBox(height:10,),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-                  SizedBox(height:20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BigText(txt: 'Latitude',fontSize: 18,),
-                      BigTextOverFlow(txt: '${_latitude.text}'),
-                    ],
-                  ),
-                  SizedBox(height:10,),
-
-                  SizedBox(height:10,),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-                  SizedBox(height:20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BigText(txt: 'Longitude',fontSize: 18,),
-                      BigTextOverFlow(txt: '${_longtude.text}'),
-                    ],
-                  ),
-                  SizedBox(height:10,),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-
-
-                  SizedBox(height:10,),
-
-                  SizedBox(height:20,),
-
-                  BigText(txt: 'Remarks',fontSize: 18,),
-                  BigText(txt: 'jedwhh jhewhejhw dhjfehjfd hjjhdfhjfd gtgyween gewghwe'),
-
-                  SizedBox(height:10,),
-                  Divider(height: 10,color: AppColor.defaultIconColor,),
-
-
-                  SizedBox(height:10,),
-                  ///
-                  Container(
-                    width: MediaQuery.of(context).size.width*0.9,
-                    height: MediaQuery.of(context).size.height*0.3,
-
-                    child:GoogleMap(
-                      liteModeEnabled: true,     // the required field
-                      mapToolbarEnabled: false,
-                      initialCameraPosition: CameraPosition(
-
-                        target: _center,
-                        zoom: 11.0,
-                      ),
-                      markers: {
-                        const Marker(
-                          markerId: MarkerId('Sydney'),
-                          position: LatLng(-33.86, 151.20),
-                        )
-                      },
-                    ),
-                  ),
-
-
-
+                  _error !=null?Padding(padding: const EdgeInsets.symmetric(vertical: 30),child: BigText(txt: _error.toString(),txtColor: AppColor.bootDangerColor,), ):SizedBox.shrink()
                 ],
               ),
             )

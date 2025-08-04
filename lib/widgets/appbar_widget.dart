@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uparking/pages/scanning_page.dart';
 import '../constant/app_colors.dart';
 import '../constant/bar_text.dart';
+import '../pages/action_select_page.dart';
 import '../widgets/nav_drawer.dart';
 
 PreferredSizeWidget commonAppBar({String title='',String backwhere=''}) {
@@ -40,14 +41,14 @@ class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
         onTap: (){
           if (hasActionOnApp) {
             backWhere == 'more_menu' ? Navigator.push(
-              context, MaterialPageRoute(builder: (context) => ScanningPage()),):Navigator.push(
-              context, MaterialPageRoute(builder: (context) => ScanningPage()),);
+              context, MaterialPageRoute(builder: (context) => ActionSelectPage()),):Navigator.push(
+              context, MaterialPageRoute(builder: (context) => ActionSelectPage()),);
           }
 
             switch(backWhere){
             case 'prebuying': Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) =>  ScanningPage()),
+              MaterialPageRoute(builder: (context) =>  ActionSelectPage()),
             );
 
 

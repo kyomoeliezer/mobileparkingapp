@@ -12,6 +12,7 @@ import '../constant/bar_text.dart';
 import '../constant/small_text.dart';
 import 'package:flutter/services.dart';
 
+import '../pages/action_select_page.dart';
 import '../widgets/loading_with_words.dart';
 
 
@@ -69,7 +70,7 @@ class _AppLoginPageState extends State<AppLoginPage> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  ScanningPage()),
+            MaterialPageRoute(builder: (context) =>  ActionSelectPage()),
           );
 
           preferences.setString(
