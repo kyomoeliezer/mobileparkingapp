@@ -60,6 +60,7 @@ class _ScanningPageState extends State<ScanningPage> {
   final _formKey = GlobalKey<FormState>();
   Position? position;
   bool isProcessing=false;
+  bool isFirstSent=true;
 
 
   TextEditingController _vehicle= new TextEditingController();
@@ -88,15 +89,13 @@ class _ScanningPageState extends State<ScanningPage> {
   }
 
 
-
-  ///DOWNLOAD TICKETS
-  Future<void> _goParking(String vehicleNo,String action,File? galleryFile2) async {
+  Future<void> _goParkingConfirmPlate(String vehicleNo,String action,File? galleryFile2) async {
 
     setState(() {
       _error=null;
       isProcessing=true;
     });
-  var dataOP={'vehicleNo': vehicleNo.toString(),'action':action};
+    var dataOP={'vehicleNo': vehicleNo.toString(),'action':action};
     if(galleryFile2 !=null) {
       print('FileNameNow');
       var datanameext=_getFileExtension(galleryFile2.path);
@@ -105,6 +104,67 @@ class _ScanningPageState extends State<ScanningPage> {
       dataOP['image']=base64;
       dataOP['ext']=datanameext;
     }
+    //var parDataUrl='?vehicleNo='+vehicleNo+'&action='+action;
+    //var urlData=AppConfig.go_parking+parDataUrl;
+    //var response = await CommonFunction.getHttpRequest(urlData);
+    String? accessToken = await AppConfig.getAccessToken();
+    var response = await http.post(
+        Uri.parse(AppConfig.go_parking_confirm_first),
+        headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+          HttpHeaders.authorizationHeader: "Bearer $accessToken",
+        },
+        body: jsonEncode(dataOP)
+    );
+
+
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      //await SQLHelper.deleteAlInhouseGrades();
+
+
+      var data = jsonDecode(response.body);
+
+
+
+        setState(() {
+          _vehicle.text=data['plateNo'];
+          galleryFile=null;
+
+          isProcessing = false;
+        });
+
+
+      //AppConfig.successToast("Grades are successfully downloaded");
+      CommonFunction.customSnack(context,"${vehicleNo} are successfully parking gone",1);
+      //CommonFunction.transionRoute(context, ConfirmationPage(data: data,isExit:widget.isExit));
+
+
+
+    } else {
+      setState(() {
+        _error=jsonDecode(response.body)['detail'];
+        if (isProcessing == true) isProcessing = false;;
+        print(_error);
+
+      });
+
+
+      CommonFunction.customSnack(context,"${_error}",0);
+
+      //AppConfig.errorToast("Grades failed to be downloaded.Please try again");
+    }
+  }
+  ///DOWNLOAD TICKETS
+  Future<void> _goParking(String vehicleNo,String action) async {
+
+    setState(() {
+      _error=null;
+      isProcessing=true;
+    });
+  var dataOP={'vehicleNo': vehicleNo.toString(),'action':action};
+
     //var parDataUrl='?vehicleNo='+vehicleNo+'&action='+action;
     //var urlData=AppConfig.go_parking+parDataUrl;
     //var response = await CommonFunction.getHttpRequest(urlData);
@@ -188,7 +248,7 @@ class _ScanningPageState extends State<ScanningPage> {
         }, icon:  Icon(Icons.arrow_back_ios_new_rounded, color:AppColor.whiteColor,size: 30.0,)),
 
         backgroundColor: AppColor.maincolor,
-          title: BigText(txt:'PARKING PAGE',fontSize: 17,txtColor: AppColor.whiteColor,),
+          title: BigText(txt:widget.isExit?'CHECK OUT':'CHECK IN',fontSize: 17,txtColor: AppColor.whiteColor,),
           actions: [
           //IconButton(onPressed: () {}, icon:  Icon(Icons.arrow_back, color:AppColor.whiteColor,size: 30.0,)),
 
@@ -292,9 +352,9 @@ class _ScanningPageState extends State<ScanningPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  /*SizedBox(height:10,),
-                  BigText(txt: 'Vehicle Number',fontSize: 18,),
-                  Padding(padding: EdgeInsets.all(2),
+                  SizedBox(height:10,),
+                  (_vehicle.text!=null)&(_vehicle.text!='')?BigText(txt: 'Vehicle Number',fontSize: 18,):SizedBox.shrink(),
+                  (_vehicle.text!=null)&&(_vehicle.text!='')?Padding(padding: EdgeInsets.all(2),
                       child:TextFormField(
                           inputFormatters: [
                             FilteringTextInputFormatter.deny(
@@ -330,7 +390,7 @@ class _ScanningPageState extends State<ScanningPage> {
                             return null;
                           }
                       )
-                  ),*/
+                  ):SizedBox.shrink(),
 
 
                  Row(
@@ -344,16 +404,16 @@ class _ScanningPageState extends State<ScanningPage> {
                  ),
                   BigText(txt: 'Click to take a picture only numbers plates',txtColor: AppColor.warningColor,),
 
-                  SizedBox(height: 60,),
+                  (galleryFile!=null)?SizedBox(height: 60,):SizedBox.shrink(),
 
-                  SizedBox(
+                  (galleryFile!=null)?SizedBox(
                     height: 200.0,
                     width: 300.0,
                     child: galleryFile == null
                         ? const Center(child: Text('Sorry nothing selected!!'))
                         : Center(child: Image.file(galleryFile!)),
-                  ),
-                  Padding(
+                  ):SizedBox.shrink(),
+                  galleryFile!=null?Padding(
                     padding: const EdgeInsets.symmetric(vertical: 30),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -362,7 +422,7 @@ class _ScanningPageState extends State<ScanningPage> {
                       ),
 
 
-                      child: BigText(txt:widget.isExit?'Go Out':'Go In',fontSize: 17,txtColor: AppColor.whiteColor,),
+                      child: BigText(txt:widget.isExit?'Get PlateNumber':'Get PlateNumber',fontSize: 17,txtColor: AppColor.whiteColor,),
 
                       onPressed: () async {
                         print('Imebonyezwa');
@@ -372,15 +432,43 @@ class _ScanningPageState extends State<ScanningPage> {
                           print('_vehicle');
 
                           print(_vehicle.text);
-                          if (widget.isExit) _goParking('test','out',galleryFile);
-                          else await _goParking('test','in',galleryFile);
+                          if (widget.isExit) _goParkingConfirmPlate('test','out',galleryFile);
+                          else await _goParkingConfirmPlate('test','in',galleryFile);
 
                         }
 
                       },
 
                     ),
-                  ),
+                  ):SizedBox.shrink(),
+                  (_vehicle.text!=null)&(_vehicle.text!='')?Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.maincolor,
+                        minimumSize: Size.fromHeight(50), // fromHeight use double.infinity as width and 40 is the height
+                      ),
+
+
+                      child: BigText(txt:widget.isExit?'Check out':'Check In',fontSize: 17,txtColor: AppColor.whiteColor,),
+
+                      onPressed: () async {
+                        print('Imebonyezwa');
+                        // Validate returns true if the form is valid, or false otherwise.
+                        if (_formKey.currentState!.validate()) {
+                          print('Validated');
+                          print('_vehicle');
+
+                          print(_vehicle.text);
+                          if (widget.isExit) _goParking(_vehicle.text,'out');
+                          else await _goParking(_vehicle.text,'in');
+
+                        }
+
+                      },
+
+                    ),
+                  ):SizedBox.shrink(),
                   _error !=null?Padding(padding: const EdgeInsets.symmetric(vertical: 30),child: BigText(txt: _error.toString(),txtColor: AppColor.bootDangerColor,), ):SizedBox.shrink()
                 ],
               ),

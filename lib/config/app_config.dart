@@ -11,6 +11,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
   static  String get_your_assigned_amcos_url=base_url+"api/agro/get-your-assigned-amcos";
   static String go_parking=base_url+"api/parking/go-car-park";
   static String go_parking_file=base_url+"api/parking/go-car-park-file";
+  static String go_parking_confirm_first=base_url+"api/parking/go-car-park-confirm";
 
 
   static  String loginUrl=base_url+"api/auth/login";

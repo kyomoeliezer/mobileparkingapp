@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uparking/config/common_functions.dart';
 import 'package:uparking/constant/bar_text.dart';
+import 'package:uparking/pages/print_page.dart';
 import 'package:uparking/pages/scanning_page.dart';
 
 import '../constant/app_colors.dart';
@@ -52,6 +53,17 @@ class _ActionSelectPageState extends State<ActionSelectPage> {
               CommonFunction.transionRoute(context, ScanningPage(isExit: true,));
 
             }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'KUTOKA',txtColor: AppColor.whiteColor,),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.bootDangerColor,
+                foregroundColor: Colors.white,
+              ),
+            ),
+
+            ElevatedButton.icon(onPressed:(){
+              CommonFunction.transionRoute(context, PrintPage());
+
+            }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'test',txtColor: AppColor.whiteColor,),
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColor.bootDangerColor,
