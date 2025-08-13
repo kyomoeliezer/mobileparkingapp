@@ -3,6 +3,7 @@ import 'package:uparking/config/common_functions.dart';
 import 'package:uparking/constant/bar_text.dart';
 import 'package:uparking/pages/print_page.dart';
 import 'package:uparking/pages/scanning_page.dart';
+import 'package:uparking/pages/sunm_screen.dart';
 
 import '../constant/app_colors.dart';
 
@@ -59,14 +60,14 @@ class _ActionSelectPageState extends State<ActionSelectPage> {
                 foregroundColor: Colors.white,
               ),
             ),
-
+            SizedBox(height: 60,),
             ElevatedButton.icon(onPressed:(){
-              CommonFunction.transionRoute(context, PrintPage());
+              CommonFunction.transionRoute(context, SunmiScreen());
 
-            }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'test',txtColor: AppColor.whiteColor,),
+            }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'Print Test',txtColor: AppColor.whiteColor,),
 
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.bootDangerColor,
+                backgroundColor: AppColor.maincolor,
                 foregroundColor: Colors.white,
               ),
             ),

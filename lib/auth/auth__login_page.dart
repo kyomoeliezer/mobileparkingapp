@@ -139,7 +139,7 @@ class _AppLoginPageState extends State<AppLoginPage> {
                 Container(
                   width: width,
                   height: height*0.35,
-                  child: Image.asset('assets/images/icon/user.png',fit: BoxFit.contain,),
+                  child: Image.asset('assets/images/login/login2.png',fit: BoxFit.contain,),
                 ),
 
                 Padding(
@@ -222,11 +222,11 @@ class _AppLoginPageState extends State<AppLoginPage> {
                       SmallText(txt: 'Forget password?'),
                       ElevatedButton(
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(AppColor.bootProceedColor),
-                          foregroundColor: WidgetStateProperty.all<Color>(AppColor.bootProceedColor),
-                          overlayColor: WidgetStateProperty.all<Color>(AppColor.bootProceedColor),
-                          shadowColor: WidgetStateProperty.all<Color>(AppColor.bootProceedColor),
-                          elevation: WidgetStateProperty.all<double>(0.1),
+                          backgroundColor: MaterialStateProperty.all<Color>(AppColor.bootProceedColor),
+                          foregroundColor:  MaterialStateProperty.all<Color>(AppColor.bootProceedColor),
+                          overlayColor: MaterialStateProperty.all<Color>(AppColor.bootProceedColor),
+                          shadowColor: MaterialStateProperty.all<Color>(AppColor.bootProceedColor),
+                          elevation: MaterialStateProperty.all(2),
                         ),
 
                         child: BigText(txt: 'Login',fontSize: 20,txtColor: AppColor.whiteColor,),

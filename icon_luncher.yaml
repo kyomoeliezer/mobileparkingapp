@@ -1,0 +1,9 @@
+# dart run icons_launcher:create
+
+icons_launcher:
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/images/login/login2.png"
+      notification_image: "assets/images/login/login2.png"
+

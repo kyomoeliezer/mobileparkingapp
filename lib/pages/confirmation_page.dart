@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sunmi_printer_plus/core/enums/enums.dart';
-import 'package:sunmi_printer_plus/core/helpers/sunmi_helper.dart';
-import 'package:sunmi_printer_plus/core/styles/sunmi_barcode_style.dart';
-import 'package:sunmi_printer_plus/core/styles/sunmi_qrcode_style.dart';
-import 'package:sunmi_printer_plus/core/styles/sunmi_text_style.dart';
-import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
-import 'package:sunmi_printer_plus/core/types/sunmi_column.dart';
-import 'package:sunmi_printer_plus/core/types/sunmi_text.dart';
+
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
+import 'package:uparking/pages/sumn_page.dart';
 import '../config/common_functions.dart';
 import '../constant/app_colors.dart';
 import '../constant/bar_text.dart';
@@ -26,12 +20,13 @@ class ConfirmationPage extends StatefulWidget {
 class _ConfirmationPageState extends State<ConfirmationPage> {
   final _formKey = GlobalKey<FormState>();
   bool isProcessing=false;
-  final SunmiPrinterPlus sunmiPrinterPlus = SunmiPrinterPlus();
+  final SunmiPrinter sunmiPrinterPlus = SunmiPrinter();
+
 
 
   @override
   void initState() {
-    final SunmiPrinterPlus sunmiPrinterPlus = SunmiPrinterPlus();
+    final SunmiPrinter sunmiPrinterPlus = SunmiPrinter();
     super.initState();
   }
 
@@ -188,9 +183,8 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                       SizedBox(height: 100,),
 
                       ElevatedButton.icon(onPressed:() async{
-                        print('printout');
-                        ///CommonFunction.transionRoute(context, ScanningPage(isExit: true,));
-                        print(await sunmiPrinterPlus.getStatus());
+                        Sunmi printer = Sunmi();
+                        printer.printReceipt2(widget.data);
                       }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'Print',txtColor: AppColor.whiteColor,),
 
                         style: ElevatedButton.styleFrom(

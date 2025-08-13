@@ -7,6 +7,7 @@ import '../constant/bar_text.dart';
 
 
 import '../config/common_functions.dart';
+import '../pages/sunm_screen.dart';
 
 class NavDrawer extends StatefulWidget {
   @override
@@ -71,6 +72,12 @@ class _NavDrawerState extends State<NavDrawer> {
             title: Text(username.toUpperCase()),
             onTap: () => {},
           ),
+          ListTile(
+            leading: Icon(Icons.supervised_user_circle_outlined),
+            title: Text('Sunmi'),
+            onTap: () => {CommonFunction.transionRoute(context, SunmiScreen())},
+          ),
+
 
  //connect
 
