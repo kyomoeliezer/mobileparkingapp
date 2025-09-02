@@ -104,12 +104,16 @@ class Sunmi {
     await initialize();
     await printLogoImage();
     await printQRCode("${data['carNo']}");
+    await SunmiPrinter.printBarCode('${data['carNo']}',
+        barcodeType: SunmiBarcodeType.CODE128,
+        textPosition: SunmiBarcodeTextPos.TEXT_UNDER,
+        height: 20,width: 200);;
     await printText(data['carNo']);
     await printRowAndColumns(
         column1: "Check In ", column2: "${data['parked_at']}"
     );
     await printRowAndColumns(
-        column1: "Out ", column2: "${data['parked_at']}"
+        column1: "Exit ", column2: "${data['parked_at']}"
     );
     await printRowAndColumns(
         column1: "Billing at ", column2: "${data['billingAt'] !=null?data['billingAt']:'----'}"
