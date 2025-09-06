@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:sunmi_printer_plus/column_maker.dart';
 import 'package:sunmi_printer_plus/enums.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 import 'package:sunmi_printer_plus/sunmi_style.dart';
+import 'package:uparking/constant/bar_text.dart';
 
 class Sunmi {
   // initialize sunmi printer
@@ -36,6 +38,16 @@ class Sunmi {
     await SunmiPrinter.lineWrap(1); // creates one line space
     await SunmiPrinter.printText(text,
         style: SunmiStyle(
+          fontSize: SunmiFontSize.XL,
+          bold: true,
+          align: SunmiPrintAlign.CENTER,
+        ));
+    await SunmiPrinter.lineWrap(1); // creates one line space
+  }
+  Future<void> printText2(String text) async {
+    await SunmiPrinter.lineWrap(1); // creates one line space
+    await SunmiPrinter.printText(text,
+        style: SunmiStyle(
           fontSize: SunmiFontSize.MD,
           bold: true,
           align: SunmiPrintAlign.CENTER,
@@ -49,7 +61,7 @@ class Sunmi {
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
     await SunmiPrinter.lineWrap(1); // creates one line space
     await SunmiPrinter.printQRCode(text);
-    await SunmiPrinter.lineWrap(4); // creates one line space
+   // await SunmiPrinter.lineWrap(1); // creates one line space
   }
 
   // print row and 2 columns
@@ -102,25 +114,20 @@ class Sunmi {
   }
   Future<void> printReceipt2(Map<String,dynamic> data) async {
     await initialize();
-    await printLogoImage();
+    await printText("UPL PARKING");
+   /// BigText(txt: 'UBUNGO PLAZA PARKING',fontSize: 25,);
     await printQRCode("${data['carNo']}");
-    await SunmiPrinter.printBarCode('${data['carNo']}',
+    /*await SunmiPrinter.printBarCode('${data['carNo']}',
         barcodeType: SunmiBarcodeType.CODE128,
         textPosition: SunmiBarcodeTextPos.TEXT_UNDER,
-        height: 20,width: 200);;
-    await printText(data['carNo']);
-    await printRowAndColumns(
-        column1: "Check In ", column2: "${data['parked_at']}"
-    );
-    await printRowAndColumns(
-        column1: "Exit ", column2: "${data['parked_at']}"
-    );
-    await printRowAndColumns(
-        column1: "Billing at ", column2: "${data['billingAt'] !=null?data['billingAt']:'----'}"
-    );
-    await printRowAndColumns(
-        column1: "Billing amount ", column2: data['billingAmount']==null?'---':'${data['billingAmount']}'
-    );
+        );*/
+    //await printRowAndColumns(column1: "IN", column2: "${data['parked_at']}", column3: "");
+    await printText("${data['carNo']}");
+    await printText2("IN : ${data['parked_at']}");
+    await SunmiPrinter.lineWrap(4);
+    //await printQRCode("${data['carNo']}");
+   // SizedBox(height:200,);
+
 
     //await SunmiPrinter.cut();
     await closePrinter();

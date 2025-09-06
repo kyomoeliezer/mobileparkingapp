@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
+import 'package:uparking/pages/scanning_page.dart';
 import 'package:uparking/pages/sumn_page.dart';
 import '../config/common_functions.dart';
 import '../constant/app_colors.dart';
@@ -171,7 +172,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(onPressed:(){
-                        CommonFunction.transionRoute(context, ActionSelectPage());
+                        CommonFunction.transionRoute(context, ScanningPage(isExit: false));
 
                       }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'ANZA UPYA',txtColor: AppColor.whiteColor,),
 

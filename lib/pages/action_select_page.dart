@@ -61,7 +61,7 @@ class _ActionSelectPageState extends State<ActionSelectPage> {
               ),
             ),
             SizedBox(height: 60,),
-            ElevatedButton.icon(onPressed:(){
+          /*  ElevatedButton.icon(onPressed:(){
               CommonFunction.transionRoute(context, SunmiScreen());
 
             }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'Print Test',txtColor: AppColor.whiteColor,),
@@ -70,7 +70,7 @@ class _ActionSelectPageState extends State<ActionSelectPage> {
                 backgroundColor: AppColor.maincolor,
                 foregroundColor: Colors.white,
               ),
-            ),
+            ),*/
           ],
         ),
       ),
