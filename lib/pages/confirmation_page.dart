@@ -172,7 +172,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(onPressed:(){
-                        CommonFunction.transionRoute(context, ScanningPage(isExit: false));
+                        CommonFunction.transionRoute(context, ActionSelectPage());
 
                       }, icon:Icon(Icons.exit_to_app_outlined) ,label: BigText(txt: 'ANZA UPYA',txtColor: AppColor.whiteColor,),
 
